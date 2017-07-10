@@ -70,19 +70,32 @@
   (initLocalState [this] {:folded? true})
   (render [this]
     (let [{:keys [folded?]} (om/get-state this)
-          {:keys [render]} (om/props this)
+          {:keys [render len] :or {len 40}} (om/props this)
           {:keys [title value classes]} (render folded?)]
       (dom/div #js {:className "foldable"}
         (dom/a #js {:className classes
                     :onClick #(om/update-state! this update :folded? not)}
           (if folded? \u25BA \u25BC)
           (if folded?
-            (str (apply str (take 40 title))
-              (when (< 40 (count title)) "..."))
+            (str (apply str (take len title))
+              (when (< len (count title)) "..."))
             (str title)))
         (dom/div #js {:className (when folded? "hidden")}
           value)))))
 (def ui-foldable (om/factory Foldable {:keyfn #(gensym "foldable")}))
+
+(defui ^:once StackTrace
+  Object
+  (render [this]
+    (dom/ul nil
+      (map #(if (str/blank? (:method %)) (:file %)
+              (ui-foldable
+                {:len 80
+                 :render (fn [folded?]
+                           {:title (:method %)
+                            :value (when-not folded? (:file %))})}))
+        (cljs.reader/read-string (om/props this))))))
+(def ui-stack-trace (om/factory StackTrace {:keyfn #(gensym "stacktrace")}))
 
 (defui ^:once ResultLine
   Object
@@ -98,7 +111,7 @@
               {:render (fn [folded?]
                          {:title (if stack (str value)
                                    (if folded? (str value) title))
-                          :value (if stack stack (if-not folded? (html-edn value)))
+                          :value (if stack (ui-stack-trace stack) (if-not folded? (html-edn value)))
                           :classes (if stack "stack")})})))))))
 (def ui-result-line (om/factory ResultLine {:keyfn #(gensym "result-line")}))
 

@@ -1,9 +1,10 @@
 (ns fulcro-spec.reporter
   #?(:cljs (:require-macros [fulcro-spec.reporter]))
   (:require
-    #?@(:cljs ([cljs-uuid-utils.core :as uuid]
-               [cljs.stacktrace :refer [parse-stacktrace]]))
+    #?@(:cljs ([cljs-uuid-utils.core :as uuid]))
     [clojure.set :as set]
+    [clojure.string :as str]
+    [clojure.spec.alpha :as s]
     [clojure.test :as t]
     [com.stuartsierra.component :as cp]
     [fulcro-spec.diff :refer [diff]])
@@ -48,7 +49,16 @@
 
 (defn make-manual [test-name] (make-testitem {:string (str test-name " (MANUAL TEST)")}))
 
-#?(:cljs (defn- stack->trace [st] (parse-stacktrace {} st {} {})))
+(defn- get-stack-trace [{:keys [actual]}]
+  #?(:cljs (some-> actual .-stack (str/split #"\n"))
+     :clj (some->> actual .getStackTrace (into []))))
+
+(defn- parse-stacktrace [st]
+  (mapv (comp
+          (partial zipmap [:method :file])
+          #?(:clj (juxt (memfn getClassName) (memfn getFileName))
+             :cljs (fn [ele] (str/split ele #"@"))))
+    st))
 
 (defn merge-in-diff-results
   [{:keys [actual expected assert-type] :as test-result}]
@@ -62,9 +72,8 @@
             :status status
             :where (t/testing-vars-str t)})
       (merge-in-diff-results)
-      #?(:cljs (#(if (some-> % :actual .-stack)
-                   (assoc % :stack (-> % :actual .-stack stack->trace))
-                   %)))
+      (as-> t (let [st (some-> t get-stack-trace parse-stacktrace str)]
+                (cond-> t st (assoc :stack st))))
       (update :actual fix-str)
       (update :expected fix-str)))
 

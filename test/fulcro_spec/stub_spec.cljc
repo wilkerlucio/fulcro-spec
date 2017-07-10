@@ -14,6 +14,7 @@
     [(s/make-step 'stub 1 [])]))
 
 (specification "increment-script-call-count"
+  (assertions (throw (ex-info "ack" {})) => 32)
   (behavior "finds and increments the correct step"
     (let [script (make-simple-script)]
 
