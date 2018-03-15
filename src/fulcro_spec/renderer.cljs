@@ -5,7 +5,7 @@
     [goog.string :as gstr]
     [com.stuartsierra.component :as cp]
     [goog.dom :as gdom]
-    [fulcro.client.dom :as dom]
+    [fulcro.client.alpha.dom :as dom]
     [fulcro.client.primitives :as prim :refer [defui]]
     [pushy.core :as pushy]
     [fulcro.client :as fc]
@@ -15,7 +15,8 @@
     [fulcro-spec.dom.edn-renderer :refer [html-edn]]
     [fulcro-spec.diff :as diff]
     [fulcro-spec.selectors :as sel]
-    [fulcro.websockets.networking :as wn])
+    [fulcro.websockets.networking :as wn]
+    [fulcro.ui.html-entities :as ent])
   (:import
     (goog.date DateTime)
     (goog.i18n DateTimeFormat)))
@@ -105,41 +106,43 @@
   (render [this]
     (let [{:keys [index diff actual]} (prim/props this)
           [fst rst] (split-at 2 diff)]
-      (->> (dom/div nil
-             (map-indexed (fn [idx line] (ui-human-diff-lines (prim/computed line {:index (str "first-" idx)}))) fst)
-             (when (seq rst)
-               (map-indexed (fn [idx line] (ui-human-diff-lines (prim/computed line {:index (str "rest-" idx)}))) rst)))
-        (dom/td nil)
-        (dom/tr nil
-          (dom/td (clj->js {:style {:verticalAlign "top"}}) "DIFFS:"))))))
+      (dom/tr nil
+        (dom/td {:style {:verticalAlign "top"}} "DIFFS:")
+        (dom/td nil
+          (dom/div nil
+            (map-indexed (fn [idx line] (ui-human-diff-lines (prim/computed line {:index (str "first-" idx)}))) fst)
+            (when (seq rst)
+              (map-indexed (fn [idx line] (ui-human-diff-lines (prim/computed line {:index (str "rest-" idx)}))) rst))))))))
+
 (def ui-human-diff (prim/factory HumanDiff {:keyfn :index}))
 
 (defui ^:once TestResult
   Object
   (render [this]
     (let [{:keys [where message extra actual expected stack diff]} (prim/props this)]
-      (->> (dom/tbody nil
-             (when message
-               (ui-result-line {:type  :normal
-                                :title "ASSERTION: "
-                                :value message}))
-             (ui-result-line {:type  :normal
-                              :title "Actual: "
-                              :value actual
-                              :stack stack})
-             (ui-result-line {:type  :normal
-                              :title "Expected: "
-                              :value expected})
-             (when extra
-               (ui-result-line {:type  :normal
-                                :title "Message: "
-                                :value extra}))
-             (when diff
-               (ui-human-diff {:actual actual
-                               :index  "diff"
-                               :diff   diff})))
-        (dom/table nil)
-        (dom/li nil)))))
+      (dom/li nil
+        (dom/table nil
+          (dom/tbody nil
+            (when message
+              (ui-result-line {:type  :normal
+                               :title "ASSERTION: "
+                               :value message}))
+            (ui-result-line {:type  :normal
+                             :title "Actual: "
+                             :value actual
+                             :stack stack})
+            (ui-result-line {:type  :normal
+                             :title "Expected: "
+                             :value expected})
+            (when extra
+              (ui-result-line {:type  :normal
+                               :title "Message: "
+                               :value extra}))
+            (when diff
+              (ui-human-diff {:actual actual
+                              :index  "diff"
+                              :diff   diff}))))))))
+
 (def ui-test-result (prim/factory TestResult {:keyfn :id}))
 
 (declare ui-test-item)
@@ -229,22 +232,23 @@
   (assert (keyword? icon-path) "Must pass a :key")
   (let [add-class  (fn [attrs])
         path-check (icon-path material-icon-paths)
-        icon-name  (str/replace (name icon-path) #"_" "-")]
+        icon-name  (str/replace (name icon-path) #"_" "-")
+        attrs (clj->js
+                (cond->
+                  {:className       (str/join " " [(concat-class-string "c-icon" "--" modifiers)
+                                                   (str "c-icon--" icon-name)
+                                                   (concat-state-string states)
+                                                   (concat-class-string className)])
+                   :version         "1.1"
+                   :xmlns           "http://www.w3.org/2000/svg"
+                   :width           "24"
+                   :height          "24"
+                   :aria-labelledby "title"
+                   :role            "img"
+                   :viewBox         "0 0 24 24"}
+                  onClick (assoc :onClick #(onClick))))]
     (when-not (str/blank? path-check)
-      (dom/svg (clj->js
-                 (cond->
-                   {:className       (str/join " " [(concat-class-string "c-icon" "--" modifiers)
-                                                    (str "c-icon--" icon-name)
-                                                    (concat-state-string states)
-                                                    (concat-class-string className)])
-                    :version         "1.1"
-                    :xmlns           "http://www.w3.org/2000/svg"
-                    :width           "24"
-                    :height          "24"
-                    :aria-labelledby "title"
-                    :role            "img"
-                    :viewBox         "0 0 24 24"}
-                   onClick (assoc :onClick #(onClick))))
+      (dom/svg attrs
         (dom/title nil (str (title-case (str/replace (name icon-path) #"_" " "))))
         (dom/path #js {:d path-check})))))
 
@@ -299,8 +303,8 @@
 
 (let [render-input (fn [{:keys [type id] :as props}]
                      (dom/span nil
-                       (dom/input (clj->js props))
-                       (dom/label #js {:htmlFor id} \u00A0)))]
+                       (dom/input props)
+                       (dom/label #js {:htmlFor id} ent/nbsp)))]
   (defn ui-checkbox
     "Render a checkbox (not the label). Props is a normal clj(s) map with React/HTML attributes plus:
 

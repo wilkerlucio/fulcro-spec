@@ -8,7 +8,7 @@
                  [kibu/pushy "0.3.8"]
                  [lein-doo "0.1.8" :scope "test"]
                  [ring/ring "1.6.3" :exclusions [commons-codec]]
-                 [fulcrologic/fulcro "2.2.1" :exclusions [org.clojure/clojure org.clojure/tools.reader]]
+                 [fulcrologic/fulcro "2.4.0-SNAPSHOT" :exclusions [org.clojure/clojure org.clojure/tools.reader]]
                  [org.clojure/core.async "0.4.474"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.946"]
@@ -78,6 +78,6 @@
                                         :port             7007
                                         :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
                          :dependencies [[com.cemerick/piggieback "0.2.2"]
-                                        [figwheel-sidecar "0.5.14" :exclusions [ring/ring-core http-kit joda-time]]
+                                        [figwheel-sidecar "0.5.15" :exclusions [ring/ring-core http-kit joda-time]]
                                         [org.clojure/tools.nrepl "0.2.13"]
                                         [org.clojure/test.check "0.9.0"]]}})
