@@ -2,8 +2,9 @@
   (:require [fulcro-spec.core #?(:clj :refer :cljs :refer-macros)
              [specification behavior provided
               with-timeline async tick assertions]]
-            #?(:clj [clojure.test :refer [is]])
-            #?(:cljs [cljs.test :refer-macros [is]])))
+    #?(:clj
+            [clojure.test :refer [is]])
+    #?(:cljs [cljs.test :refer-macros [is]])))
 
 
 #?(:cljs
@@ -22,7 +23,7 @@
 
              (behavior "after first tick only the callbacks that satisfy the"
                (tick 101)
-               (is (= 1  (count @detector)))
+               (is (= 1 (count @detector)))
                )
 
              (behavior "more functions can run before next callback is called"
@@ -35,11 +36,4 @@
                (is (= 3 (count @detector)))
                (is (= "FIRST" (first @detector)))
                (is (= "SECOND" (second @detector)))
-               (is (= "LAST" (last @detector)))
-               )
-             )
-           )
-         )
-       )
-     )
-   )
+               (is (= "LAST" (last @detector))))))))))
