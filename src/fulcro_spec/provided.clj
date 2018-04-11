@@ -68,12 +68,15 @@
     (s/cat
       :mock-name symbol?
       :params (s/* ::ffs/any))))
+
 (s/def ::arrow arrow?)
+
 (s/def ::triple
   (s/cat
     :under-mock ::under-mock
     :arrow ::arrow
     :result ::ffs/any))
+
 (s/def ::mocks
   (s/cat
     :mocks (s/+ ::triple)

@@ -1,3 +1,8 @@
+2.2.0
+-----
+- Imported Thomas Heller's hacks on cljs test, which make hot-reload
+of tests work a whole lot better for cljs.
+
 2.1.0
 -----
 - Upgrade to Clojure 1.9, Clojurescript 1.10

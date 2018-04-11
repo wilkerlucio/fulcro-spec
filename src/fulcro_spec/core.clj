@@ -21,7 +21,6 @@
     :selectors (s/* keyword?)
     :body (s/* ::fss/any)))
 
-(s/fdef specification :args ::specification)
 (defmacro specification
   "Defines a specification which is translated into a what a deftest macro produces with report hooks for the
    description. Technically outputs a deftest with additional output reporting.
@@ -38,12 +37,12 @@
            (im/try-report ~name
              ~@body))))))
 
+(s/fdef specification :args ::specification)
+
 (s/def ::behavior (s/cat
                     :name (constantly true)
                     :opts (s/* keyword?)
                     :body (s/* ::fss/any)))
-(s/fdef behavior :args ::behavior)
-
 (defmacro behavior
   "Adds a new string to the list of testing contexts.  May be nested,
    but must occur inside a specification. If the behavior is not machine
@@ -60,6 +59,8 @@
        (im/with-reporting ~{:type typekw :string name}
          (im/try-report ~name
            ~@body)))))
+
+(s/fdef behavior :args ::behavior)
 
 (defmacro component
   "An alias for behavior. Makes some specification code easier to read where a given specification is describing subcomponents of a whole."
@@ -80,11 +81,12 @@
   [& forms]
   (p/provided* (im/cljs-env? &env) :skip-output forms))
 
-(s/fdef assertions :args ::ae/assertions)
 (defmacro assertions [& forms]
   (let [blocks (ae/fix-conform (fss/conform! ::ae/assertions forms))
         asserts (map (partial ae/block->asserts (im/cljs-env? &env)) blocks)]
     `(do ~@asserts true)))
+
+(s/fdef assertions :args ::ae/assertions)
 
 (defmacro with-timeline
   "Adds the infrastructure required for doing timeline testing"

@@ -64,9 +64,8 @@
 
 (s/fdef set-selectors*
   :args (s/cat
-          :current-selectors ::selectors
-          :new-selectors ::shorthand)
-  :ret ::selectors)
+          :current-selectors (s/or :load-marker map? :selectors ::selectors)
+          :new-selectors ::shorthand))
 
 (defn set-selectors! [test-selectors]
   (swap! selectors update :current set-selectors*

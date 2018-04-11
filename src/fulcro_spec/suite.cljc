@@ -32,7 +32,7 @@
    (defn- make-test-fn [env opts]
      `(fn []
         ~(if (im/cljs-env? env)
-           `(cljs.test/run-all-tests ~(:ns-regex opts)
+           `(fulcro-spec.impl.test/run-all-tests ~(:ns-regex opts)
               (cljs.test/empty-env ::TestRunner))
            `(let [test-nss#
                   (mapcat (comp tools-ns-find/find-namespaces-in-dir io/file)

@@ -502,7 +502,8 @@
                     (when (and with-websockets? @networking)
                       (wn/install-push-handlers @networking app))
                     (df/load app :selectors SelectorControl
-                      {:post-mutation `sel/set-selectors})))]
+                      {:marker false
+                       :post-mutation `sel/set-selectors})))]
         (assoc this :app (fc/mount app root target)))
       (catch js/Object e (js/console.log "Startup Failed: " e))))
   (stop [this]

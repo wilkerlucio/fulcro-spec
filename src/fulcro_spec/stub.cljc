@@ -7,6 +7,7 @@
   {:stub stub :times times
    :ncalled 0 :literals literals
    :history []})
+
 (defn make-script [function steps]
   (atom {:function function :steps steps :history []}))
 
